@@ -1,0 +1,21 @@
+.formContainer {
+  width: 600px;
+  margin: auto;
+}
+
+.cardContainer {
+  width: 80%;
+  margin: auto;
+}
+
+.headerText {
+  text-align: center;
+  margin-bottom: 1em;
+}
+.merchantHeader {
+  margin-bottom: 3em;
+}
+
+.width {
+  width: 20%;
+}
