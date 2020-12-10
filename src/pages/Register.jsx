@@ -1,95 +1,103 @@
-import { useMutation } from '@apollo/client'
-import React, { useState } from 'react'
-import { Form, Button } from 'semantic-ui-react'
-import { REGISTER_NEW_USER } from '../graphql/register'
-import { login } from '../redux/action'
-import { connect } from 'react-redux'
-
-
+import React, { useState } from "react";
+import { REGISTER_NEW_USER } from "../graphql/register";
+import { useMutation } from "@apollo/client";
+import Spinner from "../components/Spinner";
+import { login } from "../redux/action";
+import { connect } from "react-redux";
 
 const Register = ({ login, history }) => {
-    const [errors, setErrors] = useState({})
-    const [values, setValues] = useState({
-        email: '',
-        password: '',
-        username: '',
-        confirmPassword: ''
-    })
+  const [values, setValues] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [errors, setErrors] = useState({});
 
-    const [registerUser, { loading, error }] = useMutation(REGISTER_NEW_USER, {
-        update(proxy, result) {
-            login(result.data.login)
-            history.push('/')
-        },
-        variables: values,
-        onError(error) {
-            setErrors(error.graphQLErrors[0].extensions.errors)
-        }
-    })
+  const [registerUser, { loading }] = useMutation(REGISTER_NEW_USER, {
+    variables: values,
+    update(proxy, result) {
+      login(result.data.register);
+      history.push("/");
+    },
+    onError(err) {
+      // console.log(err.graphQLErrors[0].extensions.exception.errors);
+      setErrors(err.graphQLErrors[0].extensions.exception.errors);
+    },
+  });
+  const onChange = (e) => {
+    setValues({ ...values, [e.target.name]: e.target.value });
+  };
 
-    const onChange = (e) => {
-        setValues({ ...values, [e.target.name]: e.target.value });
-    };
-    const onSubmit = e => {
-        e.preventDefault()
-        registerUser()
-    }
-    return (
-        <div className='formContainer'>
-            <Form onSubmit={onSubmit} noValidate className={loading ? 'loading' : ''}>
-                <h1 style={{ textAlign: 'center' }}>Register</h1>
-                <Form.Input
-                    label='Username'
-                    placeholder='Username...'
-                    name='username'
-                    onChange={onChange}
-                    value={values.username}
-                    error={errors.username ? true : false}
-                    type='text'
-                />
-                <Form.Input
-                    label='Email'
-                    placeholder='Email...'
-                    name='email'
-                    onChange={onChange}
-                    value={values.email}
-                    error={errors.email ? true : false}
-                    type='text'
-                />
-                <Form.Input
-                    label='Password'
-                    placeholder='Password...'
-                    name='password'
-                    onChange={onChange}
-                    value={values.password}
-                    error={errors.password ? true : false}
-                    type='password'
-                />
-                <Form.Input
-                    label='Confirm Password'
-                    placeholder='Confirm Password...'
-                    name='confirmPassword'
-                    onChange={onChange}
-                    value={values.confirmPassword}
-                    error={errors.confirmPassword ? true : false}
-                    type='password'
-                />
-                <Button type='submit' primary>Register</Button>
-            </Form>
-            {
-                Object.keys(errors).length > 0 && (
-                    <div className="ui error message">
-                        <ul className="list">
-                            {Object.values(errors).map(value => (
-                                <li key={value}>{value}</li>
-                            ))}
-                        </ul>
-                    </div>
-                )
-            }
-        </div>
+  const onSubmit = (e) => {
+    e.preventDefault();
+    registerUser();
+  };
+  return (
+    <div className="form_container">
+      {loading ? (
+        <Spinner />
+      ) : (
+        <form onSubmit={onSubmit}>
+          <div className="input_container">
+            <label>Username</label>
+            <input
+              type="text"
+              name="username"
+              placeholder="Username.."
+              onChange={onChange}
+              value={values.username}
+            />
+          </div>
 
-    )
-}
+          <div className="input_container">
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="Email..."
+              onChange={onChange}
+              value={values.email}
+            />
+          </div>
 
-export default connect(null, { login })(Register)
+          <div className="input_container">
+            <label>Password</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Password..."
+              onChange={onChange}
+              value={values.password}
+            />
+          </div>
+
+          <div className="input_container">
+            <label>Confirm Password</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm Password.."
+              onChange={onChange}
+              value={values.confirmPassword}
+            />
+          </div>
+
+          <button type="submit">Register</button>
+
+          {Object.keys(errors).length > 0 && (
+            <div className="error_message">
+              <ul className="list">
+                {Object.values(errors).map((value) => (
+                  <li key={value}>{value}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </form>
+      )}
+    </div>
+  );
+};
+
+export default connect(null, { login })(Register);

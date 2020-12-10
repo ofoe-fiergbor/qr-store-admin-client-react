@@ -20,3 +20,10 @@ export const allMerchants = (yourMerchants) => {
     payload: yourMerchants,
   };
 };
+
+export const userMerchants = (yourMerchants) => {
+  return {
+    type: "USER_MERCHANTS",
+    payload: yourMerchants,
+  };
+};

@@ -6,7 +6,7 @@ import AuthRoute from "./AuthRoute";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/Navbar.jsx";
 import Merchants from "../pages/Merchants";
 import SingleMerchant from "../pages/SingleMerchant";
 import AddMerchant from "../pages/AddMerchant";

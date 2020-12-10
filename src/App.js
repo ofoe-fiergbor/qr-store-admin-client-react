@@ -1,13 +1,7 @@
-import { Container } from "semantic-ui-react";
-
 const { default: Root } = require("./navigation/Root");
 
 function App() {
-  return (
-    <Container>
-      <Root />
-    </Container>
-  );
+  return <Root />;
 }
 
 export default App;

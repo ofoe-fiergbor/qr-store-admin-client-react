@@ -1,46 +1,46 @@
-import React, { useEffect } from "react";
-import { connect } from "react-redux";
+import React from "react";
 import { useQuery } from "@apollo/client";
 import { FETCH_ALL_MERCHANTS } from "../graphql/queries";
-import { Button } from "semantic-ui-react";
-
-import MerchantCard from "../components/MechantCard";
-import { allMerchants } from "../redux/action";
+import { connect } from "react-redux";
+import Spinner from "../components/Spinner";
 import { Link } from "react-router-dom";
 
-const Merchants = ({ user, allMerchants }) => {
-  const { loading, data } = useQuery(FETCH_ALL_MERCHANTS);
-  const yourMerchantItems =
-    user &&
-    data &&
-    data.getMerchants.filter((item) => item.email === user.email);
+import MechantCard from "../components/MechantCard";
 
-  useEffect(() => {
-    allMerchants(yourMerchantItems);
-  });
+const Merchants = ({ user, userMerchants }) => {
+  const { data, loading } = useQuery(FETCH_ALL_MERCHANTS);
 
   return (
-    <div>
-      <div className="merchantHeader">
-        <h1 className="headerText">Your Merchants</h1>
-        <Button color="teal" as={Link} to="/addMerchant">
-          Add Merchant
-        </Button>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <div>
+        {loading ? (
+          <Spinner />
+        ) : (
+          <div
+            style={{
+              width: "60vw",
+            }}
+          >
+            <button className="addMerchant">
+              <Link id="addMerchant" to="/addMerchant">
+                Add Merchant
+              </Link>
+            </button>
+            {data &&
+              data.getMerchants
+                .filter((e) => e.email === user.email)
+                .map((item) => {
+                  return <MechantCard key={item.id} item={item} />;
+                })}
+          </div>
+        )}
       </div>
-
-      {loading ? (
-        <h1>Loading.....</h1>
-      ) : (
-        user &&
-        data &&
-        yourMerchantItems.map((item) => {
-          return (
-            <div key={item.id}>
-              <MerchantCard data={item} />
-            </div>
-          );
-        })
-      )}
     </div>
   );
 };
@@ -50,5 +50,4 @@ function mstp(state) {
     user: state.auth.user,
   };
 }
-
-export default connect(mstp, { allMerchants })(Merchants);
+export default connect(mstp)(Merchants);

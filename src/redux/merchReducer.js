@@ -1,5 +1,6 @@
 const initialState = {
   merchants: null,
+  userMerchants: null,
 };
 
 const merchReducer = (state = initialState, action) => {
@@ -8,6 +9,11 @@ const merchReducer = (state = initialState, action) => {
       return {
         ...state,
         merchants: action.payload,
+      };
+    case "USER_MERCHANTS":
+      return {
+        ...state,
+        userMerchants: action.payload,
       };
     default:
       return state;

@@ -26,3 +26,31 @@ export const ADD_NEW_MERCHANT = gql`
     }
   }
 `;
+// createItem(itemName: String!, price: Int!, merchantId: ID!): Merchant!
+
+export const ADD_MERCHANT_ITEM = gql`
+  mutation createItem($itemName: String!, $price: Int!) {
+    createItem(itemName: $itemName, price: $price) {
+      id
+      username
+      createdAt
+      name
+      email
+      uniqID
+      items {
+        id
+        username
+        itemName
+        email
+        price
+        createdAt
+      }
+      likes {
+        id
+        username
+        email
+        createdAt
+      }
+    }
+  }
+`;

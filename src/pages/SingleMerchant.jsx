@@ -1,54 +1,88 @@
 import React from "react";
-import { connect } from "react-redux";
-import { Button, Modal } from "semantic-ui-react";
+import { useQuery } from "@apollo/client";
+import Spinner from "../components/Spinner";
+import DeleteItem from "../components/DeleteItem";
+
+import { FETCH_SINGLE_MERCHANT } from "../graphql/queries";
 import QRCode from "qrcode.react";
-import ItemCard from "../components/ItemCard";
+import moment from "moment";
 
-const SingleMerchant = ({ yourMerchants, match }) => {
-  const [open, setOpen] = React.useState(false);
+const SingleMerchant = (props) => {
+  const merchantId = props.match.params.id;
 
-  let postId = match.params.id;
+  const { data, loading } = useQuery(FETCH_SINGLE_MERCHANT, {
+    variables: {
+      merchantId,
+    },
+    onError(err) {
+      console.log(err);
+    },
+  });
 
-  let currentMerchant =
-    yourMerchants && yourMerchants.filter((e) => e.id === postId);
-  //   console.log(currentMerchant[0]);
-  const { name, items, likes, id } = currentMerchant[0];
+  const format = (amount) => {
+    return Number(amount)
+      .toFixed(2)
+      .replace(/\d(?=(\d{3})+\.)/g, "$&,");
+  };
 
-  return (
-    <div>
-      <Modal
-        closeIcon
-        open={open}
-        trigger={<Button color="teal">QR CODE</Button>}
-        onClose={() => setOpen(false)}
-        onOpen={() => setOpen(true)}
-      >
-        <Modal.Content>
-          <QRCode value={id} />
-        </Modal.Content>
-      </Modal>
-      <h1>{name}</h1>
-      <div>
-        {items.map((e) => {
-          return (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-              }}
-            >
-              <ItemCard />
-            </div>
-          );
-        })}
+  let singleMerch;
+  if (loading) {
+    singleMerch = <Spinner />;
+  } else {
+    const { createdAt, items, likes, name, id } = data.getMerchant;
+    singleMerch = (
+      <div className="singleMerchPage">
+        <div className="headerContainer">
+          <img
+            src="https://react.semantic-ui.com/images/avatar/large/molly.png"
+            alt="avatar"
+            className="avatarImg"
+          />
+          <QRCode
+            value={id}
+            style={{
+              height: "10em",
+              width: "10em",
+            }}
+          />
+          <div style={{ textAlign: "center", marginTop: 10 }}>
+            <h2>{name}</h2>
+            <p style={{ color: "grey" }}>{moment(createdAt).fromNow()}</p>
+            <p style={{ color: "grey" }}>Likes: {likes.length}</p>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+          }}
+        >
+          {items &&
+            items.map((item) => {
+              return (
+                <div className="card" key={item.id}>
+                  <img
+                    src="https://react.semantic-ui.com/images/avatar/large/molly.png"
+                    alt="avatar"
+                    className="itemImage"
+                  />
+                  <h3>{item.itemName}</h3>
+                  <h5 style={{ color: "grey" }}>
+                    {moment(item.createdAt).fromNow()}
+                  </h5>
+                  <h4>GHc{format(item.price)}</h4>
+                  <DeleteItem merchantId={id} itemId={item.id} />
+                </div>
+              );
+            })}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  return singleMerch;
 };
 
-function mstp(state) {
-  return {
-    yourMerchants: state.merch.merchants,
-  };
-}
-export default connect(mstp)(SingleMerchant);
+export default SingleMerchant;

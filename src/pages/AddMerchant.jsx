@@ -1,18 +1,20 @@
 import React, { useState } from "react";
-import { Form, Button } from "semantic-ui-react";
 import { useMutation } from "@apollo/client";
+import Spinner from "../components/Spinner";
+
 import { ADD_NEW_MERCHANT } from "../graphql/addMerchant";
 import { FETCH_ALL_MERCHANTS } from "../graphql/queries";
 
-const AddMerchant = ({ history }) => {
+const AddMerchant = ({ login, history }) => {
   const [values, setValues] = useState({
     name: "",
     address: "",
   });
 
-  const [createMerchant, { error }] = useMutation(ADD_NEW_MERCHANT, {
+  const [addNewMerchant, { loading }] = useMutation(ADD_NEW_MERCHANT, {
     update(proxy, result) {
       history.push("/merchants");
+
       const data = proxy.readQuery({
         query: FETCH_ALL_MERCHANTS,
       });
@@ -23,10 +25,13 @@ const AddMerchant = ({ history }) => {
           getMerchants: [result.data.createMerchant, ...data.getMerchants],
         },
       });
+
+      values.name = "";
+      values.address = "";
     },
     variables: values,
-    onError(error) {
-      console.log(error);
+    onError(err) {
+      console.log(JSON.stringify(err, null, 2));
     },
   });
 
@@ -35,39 +40,42 @@ const AddMerchant = ({ history }) => {
   };
 
   const onSubmit = (e) => {
-    if (values.name.length === 0 && values.address.length === 0) {
-      alert("Fields cannot be empty");
-    }
-    createMerchant();
     e.preventDefault();
+    if (loading) return;
+    addNewMerchant();
   };
   return (
-    <div className="formContainer">
-      <Form onSubmit={onSubmit} noValidate>
-        <h1 style={{ textAlign: "center" }}>Login</h1>
+    <div className="form_container">
+      <h1 style={{ marginBottom: 20 }}>Create New Merchant</h1>
+      {loading ? (
+        <Spinner />
+      ) : (
+        <form onSubmit={onSubmit}>
+          <div className="input_container">
+            <label>Merchant Name</label>
+            <input
+              type="text"
+              name="name"
+              placeholder="Merchant name..."
+              onChange={onChange}
+              value={values.name}
+            />
+          </div>
 
-        <Form.Input
-          label="Name"
-          placeholder="Name..."
-          name="name"
-          onChange={onChange}
-          value={values.name}
-          type="text"
-        />
+          <div className="input_container">
+            <label>Address</label>
+            <input
+              type="text"
+              name="address"
+              placeholder="Address..."
+              onChange={onChange}
+              value={values.address}
+            />
+          </div>
 
-        <Form.Input
-          label="Address"
-          placeholder="Address..."
-          name="address"
-          onChange={onChange}
-          value={values.address}
-          type="text"
-        />
-
-        <Button type="submit" color="teal">
-          Create Merchant
-        </Button>
-      </Form>
+          <button type="submit">Create Merchant</button>
+        </form>
+      )}
     </div>
   );
 };
